@@ -86,17 +86,71 @@ export default function Login() {
   };
 
   // edit
-  const btnEdit = (event) => {
-    event.preventDefault();
-    document.getElementById("add").hidden = true;
+  const btnEdit = (id, name, description) => {
+    document.getElementById("add").style = "display:none";
     document.getElementById("update").style = "display:block";
     document.getElementById("cancel").style = "display:block";
 
-    var fillName = (document.getElementById("name").value = "halo");
-    var fillDescription = (document.getElementById("description").value = "halo2");
+    document.getElementById("id-meme").value = id;
+    document.getElementById("name").value = name;
+    document.getElementById("description").value = description;
+  };
+
+  const btnEditCancel = (event) => {
+    event.preventDefault();
+
+    document.getElementById("add").style = "display:block";
+    document.getElementById("update").style = "display:none";
+    document.getElementById("cancel").style = "display:none";
+
+    document.getElementById("memeForm").reset();
   };
 
   // update
+  const editConsume = async (meme) => {
+    const options = {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(meme),
+    };
+
+    await fetch("http://localhost:3000/api/meme/update", options)
+      .then((response) => {
+        if (response.ok) {
+          alert("Meme has been updated!");
+          document.getElementById("memeForm").reset();
+          return response.json();
+        } else {
+          throw new Error("Invalid edit");
+        }
+      })
+      .then((data) => {
+        return data;
+      })
+      .catch((error) => {
+        if (error) {
+          alert("Edit failed!");
+        }
+      });
+  };
+
+  const editDone = (event) => {
+    event.preventDefault();
+
+    var idEditValue = document.getElementById("id-meme").value;
+    var nameEditValue = document.getElementById("name").value;
+    var descriptionEditValue = document.getElementById("description").value;
+
+    const meme = {
+      id: Number(idEditValue),
+      name: nameEditValue,
+      description: descriptionEditValue,
+    };
+
+    editConsume(meme);
+  };
 
   // delete
   const delMeme = async (id) => {
@@ -144,6 +198,7 @@ export default function Login() {
 
       {/* form */}
       <form className="w-96 mt-20 m-auto" id="memeForm">
+        <input type="hidden" name="id" id="id-meme"></input>
         <div className="mb-6">
           <label htmlFor="name" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
             Meme Name
@@ -179,6 +234,7 @@ export default function Login() {
             type="submit"
             id="update"
             className="text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
+            onClick={editDone}
             hidden
           >
             Update
@@ -187,6 +243,9 @@ export default function Login() {
             type="submit"
             id="cancel"
             className="text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800"
+            onClick={() => {
+              btnEditCancel;
+            }}
             hidden
           >
             Cancel
@@ -211,7 +270,9 @@ export default function Login() {
               <button
                 type="button"
                 className="text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mb-1 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:focus:ring-blue-800"
-                onClick={btnEdit}
+                onClick={() => {
+                  btnEdit(data.id, data.name, data.description);
+                }}
               >
                 Edit
               </button>
